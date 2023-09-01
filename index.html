@@ -24,20 +24,26 @@
         e.preventDefault()
 
         if (messageInput.value) {
-          socket.emit('message', {
-            user: userInput.value,
-            text: messageInput.value,
-          })
+          const user = userInput.value
+          const text = messageInput.value
+
+          socket.emit('message', {user, text})
+
           messageInput.value = ''
+          appendMessage(`${user}: ${text}`)
         }
       })
 
       socket.on('message', ({user, text}) => {
+        appendMessage(`${user}: ${text}`)
+      })
+
+      function appendMessage(message) {
         const item = document.createElement('li')
-        item.textContent = `${user}: ${text}`
+        item.textContent = message
         messages.appendChild(item)
         window.scrollTo(0, document.body.scrollHeight)
-      })
+      }
     </script>
   </body>
 </html>

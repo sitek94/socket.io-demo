@@ -30,7 +30,7 @@ io.on('connection', socket => {
     const {user, text} = message
     console.log(`${user}: ${text}`)
 
-    io.emit('message', message)
+    socket.broadcast.emit('message', message)
   })
 
   socket.on('disconnect', () => {

@@ -26,16 +26,20 @@ app.get('/', (req, res) => {
 io.on('connection', socket => {
   console.log('user connected')
 
-  socket.on('chat message', msg => {
-    console.log('message: ' + msg)
+  socket.on('message', message => {
+    const {user, text} = message
+    console.log(`${user}: ${text}`)
 
-    io.emit('chat message', msg)
+    io.emit('message', message)
   })
 
   socket.on('disconnect', () => {
     console.log('user disconnected')
 
-    socket.broadcast.emit('chat message', 'user disconnected')
+    socket.broadcast.emit('message', {
+      user: 'server',
+      text: 'user disconnected',
+    })
   })
 })
 

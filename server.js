@@ -1,32 +1,44 @@
 import express from 'express'
-import http from 'http'
+import {createServer} from 'http'
 import {Server} from 'socket.io'
-import path from 'path'
-import {fileURLToPath} from 'url'
-import {dirname} from 'path'
+import {join, dirname} from 'node:path'
+import {fileURLToPath} from 'node:url'
+import {Low} from 'lowdb'
+import {JSONFile} from 'lowdb/node'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const file = join(__dirname, 'db.json')
+
+const adapter = new JSONFile(file)
+const defaultData = {messages: []}
+const db = new Low(adapter, defaultData)
+
+await db.read()
 
 const app = express()
-const server = http.createServer(app)
+const server = createServer(app)
 const io = new Server(server)
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, './index.html'))
+  res.sendFile(__dirname + '/index.html')
 })
 
 io.on('connection', socket => {
-  console.log('New user connected')
+  console.log('user connected')
 
-  socket.on('send_message', message => {
-    io.emit('receive_message', message)
+  socket.on('chat message', msg => {
+    console.log('message: ' + msg)
+
+    io.emit('chat message', msg)
   })
 
   socket.on('disconnect', () => {
-    console.log('User disconnected')
+    console.log('user disconnected')
+
+    socket.broadcast.emit('chat message', 'user disconnected')
   })
 })
 
 server.listen(3000, () => {
-  console.log('Server running on http://localhost:3000')
+  console.log('listening on *:3000')
 })

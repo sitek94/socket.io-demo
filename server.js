@@ -33,13 +33,21 @@ io.on('connection', socket => {
     socket.broadcast.emit('message', message)
   })
 
+  socket.on('user typing', ({user}) => {
+    socket.broadcast.emit('user typing', {user})
+  })
+
+  socket.on('user stopped typing', () => {
+    socket.broadcast.emit('user stopped typing')
+  })
+
   socket.on('disconnect', () => {
     console.log('user disconnected')
 
-    socket.broadcast.emit('message', {
-      user: 'server',
-      text: 'user disconnected',
-    })
+    // socket.broadcast.emit('message', {
+    //   user: 'server',
+    //   text: 'user disconnected',
+    // })
   })
 })
 

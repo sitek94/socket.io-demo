@@ -7,6 +7,7 @@
     <label> Nickname: <input id="user" value="anonymous" /> </label>
     <hr />
     <ul id="messages"></ul>
+    <p id="typingIndicator"></p>
     <form id="form" action="">
       <input id="message" autocomplete="off" /><button>Send</button>
     </form>
@@ -19,6 +20,16 @@
       const form = document.getElementById('form')
       const messageInput = document.getElementById('message')
       const userInput = document.getElementById('user')
+      const typingIndicator = document.getElementById('typingIndicator')
+
+      messageInput.addEventListener('input', e => {
+        const value = e.target.value
+        if (value) {
+          socket.emit('user typing', {user: userInput.value})
+        } else {
+          socket.emit('user stopped typing')
+        }
+      })
 
       form.addEventListener('submit', e => {
         e.preventDefault()
@@ -27,6 +38,7 @@
           const user = userInput.value
           const text = messageInput.value
 
+          socket.emit('user stopped typing')
           socket.emit('message', {user, text})
 
           messageInput.value = ''
@@ -36,6 +48,14 @@
 
       socket.on('message', ({user, text}) => {
         appendMessage(`${user}: ${text}`)
+      })
+
+      socket.on('user typing', ({user}) => {
+        typingIndicator.textContent = `${user} is typing...`
+      })
+
+      socket.on('user stopped typing', () => {
+        typingIndicator.textContent = ''
       })
 
       function appendMessage(message) {
